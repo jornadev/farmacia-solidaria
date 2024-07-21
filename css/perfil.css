@@ -1,0 +1,56 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #9591b959;
+}
+.header {
+    background-color: #0f0c25;
+    padding: 20px;
+    text-align: center;
+    color: white;
+    width: 98%;
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+}
+.header a {
+    color: white;
+    text-decoration: none;
+}
+.header img {
+    height: 60px;
+    vertical-align: middle;
+}
+.container {
+    max-width: 800px;
+    margin: 300px auto;
+    background-color: #fff;
+    height: 300px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    overflow: hidden; /* Evita que a imagem "vaze" para fora do container */
+}
+.perfil_titulo {
+    text-align: center;
+    margin-top: 20px;
+}
+.perfil-foto {
+    float: left; /* Alinha a foto à esquerda */
+    width: 300px; /* Largura da foto */
+    height: 300px; /* Altura da foto */
+    object-fit: cover; /* Mantém proporções da imagem */
+    margin-right: 20px; /* Espaço entre a foto e o texto */
+    border-radius: 8px; /* Borda arredondada */
+    border: 2px solid #ccc; /* Borda sólida com cor cinza */
+}
+.perfil-info {
+    margin-top: 20px;
+    text-align: left; /* Alinha o texto à esquerda da foto */
+}
+.perfil-info div {
+    margin-bottom: 10px;
+}
+.perfil-info label {
+    font-weight: bold;
+}

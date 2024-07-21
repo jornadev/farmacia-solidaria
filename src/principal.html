@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmácia Solidária</title>
+    <link rel="stylesheet" href="/css/principal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0; 
+            padding-top: 100px; 
+        }
+        .header {
+            background-color: #0f0c25;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            width: 98%; 
+            position: fixed; 
+            top: 0; 
+            z-index: 1000;
+        }
+        .header a {
+            color: white;
+            text-decoration: none;
+        }
+        .header img {
+            height: 60px;
+            vertical-align: middle;
+        }
+        .menu {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .menu li {
+            display: inline;
+        }
+        .remedios_titulo {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 3rem;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            margin-top: 20px; 
+        }
+        .remedio-card {
+            background-color: rgb(228, 234, 240);
+            border: 1px solid #141313;
+            border-radius: 8px;
+            padding: 20px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 15px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .remedio-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .remedio-card h3 {
+            margin: 10px 0;
+            font-size: 1.2rem;
+        }
+        .remedio-card p {
+            color: #422f2f;
+        }
+        .disponibilidade {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+
+</head>
+
+<body>
+    <header class="header">
+        <a href="principal.html">
+            <img src="/img/logo_branca.png" alt="Logo da Empresa" id="logo">
+        </a>
+        <nav>
+            <ul class="menu">
+                <li><a href="/src/remedios.html">Remédios</a></li>
+                <li><a href="/src/notificacoes.html">Notificações</a></li> 
+                <li><a href="/src/perfil.html">Perfil</a></li>
+                <li><a href="/src/login.html">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <h1 class="remedios_titulo">Remédios Disponíveis</h1>
+
+    <main class="container" id="remedios-list"></main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0sE6U0Cpn-vA5No-j7JdZREf6oS4ScPs",
+            authDomain: "farmacia-solidaria-f14e1.firebaseapp.com",
+            projectId: "farmacia-solidaria-f14e1",
+            storageBucket: "farmacia-solidaria-f14e1.appspot.com",
+            messagingSenderId: "130504573623",
+            appId: "1:130504573623:web:c366b863fde27a1e404332"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const remediosList = document.getElementById('remedios-list');
+
+        function createRemedioCard(remedio) {
+            const card = document.createElement('div');
+            card.classList.add('remedio-card');
+
+            const img = document.createElement('img');
+            img.src = remedio.imagem || '/img/remedioo.png'; 
+            img.alt = `Imagem do remédio ${remedio.nome}`;
+
+            const h3 = document.createElement('h3');
+            h3.textContent = remedio.nome;
+
+            const pValidade = document.createElement('p');
+            pValidade.textContent = `Validade: ${remedio.validade}`;
+
+            const pReceita = document.createElement('p');
+            pReceita.textContent = `Receita Necessária: ${remedio.receita === 'sim' ? 'Sim' : 'Não'}`;
+
+            const disponibilidade = document.createElement('p');
+            disponibilidade.textContent = remedio.disponivel ? 'Disponível' : 'Indisponível';
+            disponibilidade.classList.add('disponibilidade');
+            disponibilidade.style.color = remedio.disponivel ? 'green' : 'red';
+
+            card.appendChild(img);
+            card.appendChild(h3);
+            card.appendChild(pValidade);
+            card.appendChild(pReceita); 
+            card.appendChild(disponibilidade);
+
+            return card;
+        }
+
+        function loadRemedios() {
+            db.collection('remedios')
+                .where('disponivel', '==', true) 
+                .get()
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        const remedio = doc.data();
+                        const card = createRemedioCard(remedio);
+                        remediosList.appendChild(card);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Erro ao carregar remédios: ', error);
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRemedios();
+        });
+    </script>
+</body>
+</html>

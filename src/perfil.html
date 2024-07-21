@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil</title>
+    <link rel="stylesheet" href="/css/principal.css">
+    <link rel="stylesheet" href="/css/perfil.css">
+</head>
+
+<body>
+    <header class="header">
+        <a href="principal.html">
+            <img src="/img/logo_branca.png" alt="Logo da Empresa" id="logo">
+        </a>
+        <nav>
+            <ul class="menu">
+                <li><a href="/src/login.html">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <img src="/img/user.png" alt="Foto de Perfil" class="perfil-foto">
+        <h1 class="perfil_titulo">Perfil</h1>
+        <div class="perfil-info">
+            <div>
+                <label for="profile-name">Nome:</label>
+                <span id="profile-name"></span>
+            </div>
+            <br>
+            <div>
+                <label for="profile-email">E-mail:</label>
+                <span id="profile-email"></span>
+            </div>
+            <br>
+            <div>
+                <label for="profile-cpf">CPF:</label>
+                <span id="profile-cpf"></span>
+            </div>
+        </div>
+    </div>
+        <!-- Configuração do Firebase -->
+        <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+        <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0sE6U0Cpn-vA5No-j7JdZREf6oS4ScPs",
+            authDomain: "farmacia-solidaria-f14e1.firebaseapp.com",
+            projectId: "farmacia-solidaria-f14e1",
+            storageBucket: "farmacia-solidaria-f14e1.appspot.com",
+            messagingSenderId: "130504573623",
+            appId: "1:130504573623:web:c366b863fde27a1e404332"
+            };
+
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+            const db = firebase.firestore();
+
+            const profileName = document.getElementById('profile-name');
+            const profileEmail = document.getElementById('profile-email');
+            const profileCPF = document.getElementById('profile-cpf');
+
+            function loadUserProfile(user) {
+                if (user) {
+                    // Consulta no Firestore para obter os dados do usuário
+                    db.collection('users').doc(user.uid).get().then((doc) => {
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            profileName.textContent = userData.nome;
+                            profileEmail.textContent = userData.email;
+                            profileCPF.textContent = userData.cpf;
+                        } else {
+                            console.log('Nenhum documento encontrado!');
+                        }
+                    }).catch((error) => {
+                        console.error('Erro ao obter dados do usuário:', error);
+                    });
+                } else {
+                    console.error('Nenhum usuário logado.');
+                }
+            }
+
+                auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        loadUserProfile(user);
+                    } else {
+                        window.location.href = 'login.html';
+                    }
+                });
+    </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro | Farmácia Solidária</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+    <div id="login">
+        <div class="caixa">
+            <img src="/img/logo_branca.png" alt="">
+            <h1>CADASTRO</h1>
+            <form id="register-form" onsubmit="register(event)">
+                <div class="name">
+                    <input type="text" name="name" placeholder="Nome" required>
+                </div>
+                <div class="cpf">
+                    <input type="text" name="cpf" placeholder="CPF" required>
+                </div>
+                <div class="email">
+                    <input type="email" name="email" placeholder="E-mail" required>
+                </div>
+                <div class="senha">
+                    <input type="password" name="password" placeholder="Senha" required>
+                </div>
+                <div class="senha">
+                    <input type="password" name="confirmPassword" placeholder="Confirme sua senha" required>
+                </div>
+                <div class="entrar">
+                    <p>Já tem uma conta? <a href="login.html">Entre aqui.</a></p>
+                    <input type="submit" value="Cadastrar">
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // configuração firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0sE6U0Cpn-vA5No-j7JdZREf6oS4ScPs",
+            authDomain: "farmacia-solidaria-f14e1.firebaseapp.com",
+            projectId: "farmacia-solidaria-f14e1",
+            storageBucket: "farmacia-solidaria-f14e1.appspot.com",
+            messagingSenderId: "130504573623",
+            appId: "1:130504573623:web:c366b863fde27a1e404332"
+            };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+
+        async function register(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const name = form.name.value;
+            const cpf = form.cpf.value;
+            const email = form.email.value;
+            const password = form.password.value;
+            const confirmPassword = form.confirmPassword.value;
+
+            if (password !== confirmPassword) {
+                alert('As senhas não correspondem.');
+                return;
+            }
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const userId = userCredential.user.uid;
+
+                await db.collection('users').doc(userId).set({
+                    nome: name,
+                    cpf: cpf,
+                    email: email
+                });
+
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Erro ao registrar o usuário:', error);
+                alert('Erro ao registrar o usuário: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

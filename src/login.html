@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar | Farmácia Solidária</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <form id="login-form">
+        <div id="login">
+            <div class="caixa">
+                <img src="/img/logo_branca.png" alt="">
+                <h1>LOGIN</h1>
+                <div class="email">
+                    <input type="email" id="email" placeholder="E-mail" required>
+                </div>
+                <div class="senha">
+                    <input type="password" id="password" placeholder="Senha" required>
+                </div>
+                <div class="entrar">
+                    <p>Ainda não tem uma conta? <a href="cadastro.html">Crie a sua.</a></p>
+                    <input type="submit" value="Entrar">
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+
+                    if (email === 'admin@admin.com' && password === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        firebase.auth().signInWithEmailAndPassword(email, password)
+                            .then((userCredential) => {
+                                window.location.href = 'principal.html';
+                            })
+                            .catch((error) => {
+                                const errorCode = error.code;
+                                const errorMessage = error.message;
+                                alert(errorMessage);
+                            });
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+    <script src="/script.js"></script>
+
+</body>
+</html>

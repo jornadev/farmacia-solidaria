@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração</title>
+    <link rel="stylesheet" href="/css/principal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <header class="header">
+        <a href="principal.html">
+            <img src="/img/logo_branca.png" alt="Logo da Empresa" id="logo">
+        </a>
+        <nav>
+            <ul class="menu">
+                <li><a href="/src/addremedio.html">Adicionar remédio</a></li>
+                <li><a href="/src/login.html">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <h1 class="remedios_titulo">Gerenciar Remédios Adicionados</h1>
+
+    <main class="container" id="remedios-list"></main>
+
+    <div class="popup-overlay" id="popup-overlay">
+        <div class="popup">
+            <div class="popup-header">
+                <h2>Editar Remédio</h2>
+                <button class="close-btn" id="close-popup">&times;</button>
+            </div>
+            <form class="popup-form" id="edit-form">
+                <label for="edit-nome">Nome do Remédio:</label>
+                <input type="text" id="edit-nome" name="nome" required>
+                <label for="edit-validade">Validade:</label>
+                <input type="date" id="edit-validade" name="validade" required>
+                <label for="edit-receita">Receita Necessária:</label>
+                <select id="edit-receita" name="receita" required>
+                    <option value="sim">Sim</option>
+                    <option value="não">Não</option>
+                </select>
+                <button type="submit">Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+
+    <!--configuração firebase-->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script>
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0sE6U0Cpn-vA5No-j7JdZREf6oS4ScPs",
+            authDomain: "farmacia-solidaria-f14e1.firebaseapp.com",
+            projectId: "farmacia-solidaria-f14e1",
+            storageBucket: "farmacia-solidaria-f14e1.appspot.com",
+            messagingSenderId: "130504573623",
+            appId: "1:130504573623:web:c366b863fde27a1e404332"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const remediosList = document.getElementById('remedios-list');
+
+        const popupOverlay = document.getElementById('popup-overlay');
+        const closePopupBtn = document.getElementById('close-popup');
+        const editForm = document.getElementById('edit-form');
+
+        function openEditPopup(remedio, id) {
+            document.getElementById('edit-nome').value = remedio.nome;
+            document.getElementById('edit-validade').value = remedio.validade;
+            document.getElementById('edit-receita').value = remedio.receita;
+
+            popupOverlay.style.display = 'flex';
+
+            editForm.onsubmit = function(event) {
+                event.preventDefault();
+                const updatedRemedio = {
+                    nome: editForm.nome.value,
+                    validade: editForm.validade.value,
+                    receita: editForm.receita.value
+                };
+
+                db.collection('remedios').doc(id).update(updatedRemedio)
+                    .then(() => {
+                        console.log(`Remédio com ID ${id} atualizado.`);
+                        remedio.nome = updatedRemedio.nome;
+                        remedio.validade = updatedRemedio.validade;
+                        remedio.receita = updatedRemedio.receita;
+                        renderRemedios();
+                        closePopup();
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao atualizar remédio:', error);
+                    });
+            };
+        }
+
+        function closePopup() {
+            popupOverlay.style.display = 'none';
+        }
+
+        function createRemedioCard(remedio, id) {
+            const remedioCard = document.createElement('div');
+            remedioCard.classList.add('remedio-card');
+
+            const deleteIcon = document.createElement('i');
+            deleteIcon.classList.add('fas', 'fa-trash', 'delete-icon');
+            deleteIcon.setAttribute('title', 'Excluir remédio');
+            deleteIcon.addEventListener('click', () => deleteRemedio(id));
+            remedioCard.appendChild(deleteIcon);
+
+            const editIcon = document.createElement('i');
+            editIcon.classList.add('fas', 'fa-edit', 'edit-icon');
+            editIcon.setAttribute('title', 'Editar remédio');
+            editIcon.addEventListener('click', () => openEditPopup(remedio, id));
+            remedioCard.appendChild(editIcon);
+
+            const remedioImg = document.createElement('img');
+            remedioImg.src = remedio.imagemUrl || '/img/remedioo.png';
+            remedioImg.alt = remedio.nome;
+            remedioCard.appendChild(remedioImg);
+
+            const remedioNome = document.createElement('h3');
+            remedioNome.textContent = remedio.nome;
+            remedioCard.appendChild(remedioNome);
+
+            const remedioValidade = document.createElement('p');
+            remedioValidade.textContent = `Validade: ${remedio.validade}`;
+            remedioCard.appendChild(remedioValidade);
+
+            const remedioReceita = document.createElement('p');
+            remedioReceita.textContent = `Receita Necessária: ${remedio.receita}`;
+            remedioCard.appendChild(remedioReceita);
+
+            const disponibilidade = document.createElement('p');
+            disponibilidade.classList.add('disponibilidade');
+            disponibilidade.textContent = remedio.disponivel ? 'Disponível' : 'Indisponível';
+            disponibilidade.style.color = remedio.disponivel ? 'green' : 'red';
+            remedioCard.appendChild(disponibilidade);
+
+            const toggleBtn = document.createElement('button');
+            toggleBtn.textContent = remedio.disponivel ? 'Marcar como Indisponível' : 'Marcar como Disponível';
+            toggleBtn.classList.add('toggle-btn');
+            toggleBtn.addEventListener('click', () => {
+                const novoStatus = !remedio.disponivel;
+                db.collection('remedios').doc(id).update({
+                    disponivel: novoStatus
+                }).then(() => {
+                    console.log(`Disponibilidade do remédio ${id} alterada para ${novoStatus ? 'Disponível' : 'Indisponível'}`);
+                    if (novoStatus) {
+                        notificarDisponibilidade(remedio.nome);
+                    }
+                    remedio.disponivel = novoStatus;
+                    disponibilidade.textContent = remedio.disponivel ? 'Disponível' : 'Indisponível';
+                    disponibilidade.style.color = remedio.disponivel ? 'green' : 'red';
+                    toggleBtn.textContent = remedio.disponivel ? 'Marcar como Indisponível' : 'Marcar como Disponível';
+                }).catch((error) => {
+                    console.error('Erro ao alterar disponibilidade:', error);
+                });
+            });
+            remedioCard.appendChild(toggleBtn);
+
+            return remedioCard;
+        }
+
+        function deleteRemedio(id) {
+            if (confirm('Tem certeza que deseja excluir este remédio?')) {
+                db.collection('remedios').doc(id).delete()
+                    .then(() => {
+                        console.log(`Remédio com ID ${id} deletado.`);
+                        renderRemedios();
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao deletar remédio:', error);
+                    });
+            }
+        }
+
+        function renderRemedios() {
+            remediosList.innerHTML = ''; 
+            db.collection('remedios').get()
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        const remedio = doc.data();
+                        const id = doc.id;
+                        const remedioCard = createRemedioCard(remedio, id);
+                        remediosList.appendChild(remedioCard);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Erro ao obter remédios:', error);
+                });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderRemedios();
+        });
+
+        function notificarDisponibilidade(remedioNome) {
+            const timestamp = new Date();
+            const notificacao = {
+                remedioNome: remedioNome,
+                timestamp: firebase.firestore.Timestamp.fromDate(timestamp)
+            };
+
+            db.collection('notificacoes').add(notificacao)
+                .then(() => {
+                    console.log('Notificação enviada com sucesso.');
+                })
+                .catch((error) => {
+                    console.error('Erro ao enviar notificação:', error);
+                });
+        }
+    </script>
+</body>
+</html>

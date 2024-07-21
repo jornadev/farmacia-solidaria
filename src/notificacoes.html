@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificações</title>
+    <link rel="stylesheet" href="/css/principal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/css/notify.css">
+</head>
+
+<body>
+    <header class="header">
+        <a href="principal.html">
+            <img src="/img/logo_branca.png" alt="Logo da Empresa" id="logo">
+        </a>
+        <nav>
+            <ul class="menu">
+                <li><a href="/src/login.html">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <h1 class="notificacoes_titulo">Notificações</h1>
+
+    <div class="main-container">
+        <main id="notificacoes-list"></main>
+    </div>
+
+    <!-- Configuração do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0sE6U0Cpn-vA5No-j7JdZREf6oS4ScPs",
+            authDomain: "farmacia-solidaria-f14e1.firebaseapp.com",
+            projectId: "farmacia-solidaria-f14e1",
+            storageBucket: "farmacia-solidaria-f14e1.appspot.com",
+            messagingSenderId: "130504573623",
+            appId: "1:130504573623:web:c366b863fde27a1e404332"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const notificacoesList = document.getElementById('notificacoes-list');
+
+        function createNotificacaoCard(notificacao, docId) {
+            const notificacaoCard = document.createElement('div');
+            notificacaoCard.classList.add('notificacao-card');
+
+            const remedioNome = document.createElement('h3');
+            remedioNome.textContent = notificacao.remedioNome;
+            notificacaoCard.appendChild(remedioNome);
+
+            const timestamp = document.createElement('p');
+            const date = notificacao.timestamp.toDate();
+            timestamp.textContent = `Disponível em: ${date.toLocaleString()}`;
+            timestamp.classList.add('timestamp');
+            notificacaoCard.appendChild(timestamp);
+
+            return notificacaoCard;
+        }
+
+        function renderNotificacoes() {
+            db.collection('notificacoes').orderBy('timestamp', 'desc').onSnapshot((querySnapshot) => {
+                querySnapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const notificacao = change.doc.data();
+                        const notificacaoCard = createNotificacaoCard(notificacao, change.doc.id);
+                        notificacoesList.appendChild(notificacaoCard);
+                    }
+                    if (change.type === 'removed') {
+                        const docId = change.doc.id;
+                        const cardToRemove = document.getElementById(docId);
+                        if (cardToRemove) {
+                            cardToRemove.remove();
+                        }
+                    }
+                });
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderNotificacoes();
+        });
+
+        db.collection('remedios').where('disponivel', '==', false).onSnapshot((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                const remedio = doc.data();
+                const remedioNome = remedio.nome;
+
+                db.collection('notificacoes').where('remedioNome', '==', remedioNome).get()
+                    .then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
+                            doc.ref.delete()
+                                .then(() => {
+                                    console.log(`Notificação de ${remedioNome} removida automaticamente.`);
+                                })
+                                .catch((error) => {
+                                    console.error('Erro ao remover notificação:', error);
+                                });
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao buscar notificação:', error);
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ebeaf5;
+    margin: 0;
+    padding: 0;
+}
+.header {
+    background-color: #0f0c25;
+    padding: 20px;
+    text-align: center;
+    color: white;
+}
+.header a {
+    color: white;
+    text-decoration: none;
+}
+.header img {
+    height: 60px;
+    vertical-align: middle;
+}
+.menu {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+.menu li {
+    display: inline;
+}
+.notificacoes_titulo {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 3rem;
+}
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 160px);
+    padding: 20px;
+}
+#notificacoes-list {
+    max-width: 800px; 
+    width: 100%; 
+}
+.notificacao-card {
+    background-color: #e4eaf0;
+    border: 1px solid #141313;
+    border-radius: 8px;
+    padding: 20px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 15px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px; 
+    position: relative; 
+}
+.notificacao-card h3 {
+    margin: 10px 0;
+    font-size: 1.2rem;
+}
+.notificacao-card p {
+    color: #555;
+}
+.notificacao-card .timestamp {
+    font-style: italic;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        padding: 10px;
+    }
+}
